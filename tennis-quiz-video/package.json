@@ -1,0 +1,23 @@
+{
+  "name": "tennis-quiz-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vidéo verticale 1080x1920 - Quiz Tennis Balle Rouge (Remotion)",
+  "scripts": {
+    "start": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts TennisQuiz out/tennis-quiz.mp4",
+    "still": "remotion still src/index.ts TennisQuiz out/preview.png --frame=150",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.536",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "^4.0.536"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "typescript": "^7.0.2"
+  }
+}
