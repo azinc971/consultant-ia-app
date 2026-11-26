@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#8fd8ff">
+<meta name="color-scheme" content="light">
+<meta name="description" content="Les Îles des Mots : jeu d'apprentissage de la lecture et de l'écriture (CP-CE1) avec répétition espacée.">
+<title>Les Îles des Mots – Lire et écrire (CP-CE1)</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏝️%3C/text%3E%3C/svg%3E">
+<style>
+/* =====================================================================
+   1. VARIABLES (thème, tailles, couleurs)
+   ===================================================================== */
+:root {
+  --police: "Andika", "Comic Neue", "Chalkboard SE", "Comic Sans MS", "Trebuchet MS", ui-rounded, system-ui, sans-serif;
+  --encre: #1f2a44;
+  --encre-douce: #4a5878;
+  --ciel: #8fd8ff;
+  --ciel-clair: #d9f3ff;
+  --sable: #fff4d6;
+  --blanc: #ffffff;
+  --primaire: #ff7a45;
+  --primaire-fonce: #d9531f;
+  --rouge: #e5484d;
+  --rouge-fonce: #b92f34;
+  --orange: #f5a524;
+  --orange-fonce: #c27a0a;
+  --vert: #2fb36d;
+  --vert-fonce: #1f8a50;
+  --bleu: #2f80ed;
+  --bleu-fonce: #1c5fba;
+  --violet: #8b5cf6;
+  --violet-fonce: #6a3fd1;
+  --syl-0: #d00000;
+  --syl-1: #1d4ed8;
+  --syl-2: #15803d;
+  --syl-3: #b45309;
+  --son-surbrillance: rgba(255, 207, 74, .6);
+  --rayon: 22px;
+  --ombre: 0 5px 0 rgba(31, 42, 68, .12), 0 10px 22px rgba(31, 42, 68, .10);
+  --tap: 56px;
+  --haut-barre: 56px;
+}
+
+/* =====================================================================
+   2. BASE
+   ===================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-family: var(--police);
+  font-size: 1rem;
+  line-height: 1.35;
+  color: var(--encre);
+  background: linear-gradient(180deg, var(--ciel) 0%, var(--ciel-clair) 38%, var(--sable) 100%) fixed;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+[hidden] { display: none !important; }
+h1, h2, h3, p { margin: 0; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible, .garde-btn:focus-visible {
+  outline: 4px solid #1d4ed8;
+  outline-offset: 3px;
+}
+.visuellement-cache {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+#app {
+  max-width: 560px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding:
+    max(8px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(8px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+}
+#scene {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 6px 0 12px;
+  min-width: 0;
+}
+
+/* =====================================================================
+   3. COMPOSANTS GÉNÉRIQUES
+   ===================================================================== */
+.panneau {
+  background: var(--blanc);
+  border-radius: var(--rayon);
+  padding: 16px;
+  box-shadow: var(--ombre);
+}
+.panneau h2 { font-size: 1.2rem; margin-bottom: 10px; }
+
+.btn {
+  --c: var(--primaire);
+  --cf: var(--primaire-fonce);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: var(--tap);
+  padding: 0 22px;
+  border: 0;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: #fff;
+  background: var(--c);
+  box-shadow: 0 5px 0 var(--cf);
+  transition: transform .08s ease, box-shadow .08s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--cf); }
+.btn[disabled] { opacity: .45; filter: grayscale(.5); pointer-events: none; }
+.btn-gros { min-height: 76px; font-size: 1.55rem; width: 100%; }
+.btn-moyen { min-height: 64px; width: 100%; }
+.btn-rond { width: var(--tap); min-width: var(--tap); padding: 0; border-radius: 50%; font-size: 1.5rem; }
+.btn-clair { --c: #fff; --cf: #c3cee3; color: var(--encre); }
+.btn-vert { --c: var(--vert); --cf: var(--vert-fonce); }
+.btn-bleu { --c: var(--bleu); --cf: var(--bleu-fonce); }
+.btn-rouge { --c: var(--rouge); --cf: var(--rouge-fonce); }
+.btn-violet { --c: var(--violet); --cf: var(--violet-fonce); }
+
+.barre {
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(31, 42, 68, .12);
+  overflow: hidden;
+}
+.barre-remplie {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ffd23f, #ff9f1c);
+  transition: width .5s ease;
+}
+.barre.fine { height: 10px; }
+.barre.fine .barre-remplie { background: linear-gradient(90deg, #5ad8a6, #2fb36d); }
+
+.ligne { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.petit { font-size: .9rem; color: var(--encre-douce); }
+.centre { text-align: center; }
+
+/* =====================================================================
+   4. EN-TÊTE ET NAVIGATION
+   ===================================================================== */
+.entete { display: flex; align-items: center; gap: 8px; min-height: var(--haut-barre); }
+.logo { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: .95rem; line-height: 1.1; }
+.logo .logo-emoji { font-size: 1.7rem; }
+.puce {
+  display: inline-flex; align-items: center; gap: 3px;
+  min-height: 44px; padding: 0 9px;
+  border: 0; border-radius: 999px;
+  background: #fff; box-shadow: 0 3px 0 rgba(31, 42, 68, .12);
+  font-weight: 800; font-size: .9rem;
+}
+.puce-test { background: #fde68a; }
+.nav {
+  position: sticky; bottom: 0;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  padding: 14px 0 4px;
+  margin-top: auto;
+  background: linear-gradient(180deg, rgba(255, 244, 214, 0) 0, var(--sable) 14px);
+}
+.nav button {
+  min-height: 60px; border: 0; border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 4px 0 rgba(31, 42, 68, .12);
+  font-weight: 800; font-size: .85rem;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+}
+.nav button .nav-emoji { font-size: 1.5rem; line-height: 1; }
+.nav button[aria-current="page"] { background: var(--primaire); color: #fff; box-shadow: 0 4px 0 var(--primaire-fonce); }
+body[data-vue="jeu"] .entete,
+body[data-vue="jeu"] .nav,
+body[data-vue="bilan"] .nav { display: none; }
+
+/* =====================================================================
+   5. ACCUEIL
+   ===================================================================== */
+.heros { display: flex; align-items: center; gap: 12px; }
+.mascotte-grande { font-size: 5rem; line-height: 1; animation: flotter 3s ease-in-out infinite; }
+.bulle {
+  position: relative; flex: 1;
+  background: #fff; border-radius: 20px; padding: 12px 14px;
+  box-shadow: var(--ombre);
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 700;
+}
+.bulle::before {
+  content: ""; position: absolute; left: -9px; top: 50%;
+  width: 18px; height: 18px; background: #fff;
+  transform: translateY(-50%) rotate(45deg); border-radius: 4px;
+}
+.bulle p { flex: 1; position: relative; }
+.bulle .btn { position: relative; }
+.jour .ligne { margin-bottom: 8px; font-size: 1.05rem; }
+.iles { display: flex; flex-direction: column; gap: 10px; }
+.iles h2 { font-size: 1.2rem; padding-left: 4px; }
+.ile {
+  display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; align-items: center;
+  width: 100%; min-height: 84px; padding: 12px 14px;
+  border: 0; border-radius: var(--rayon);
+  color: #fff; text-align: left;
+  background: var(--ile-c);
+  box-shadow: 0 5px 0 var(--ile-cf);
+}
+.ile:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--ile-cf); }
+.ile .ile-emoji { grid-row: span 2; font-size: 2.6rem; line-height: 1; }
+.ile .ile-nom { font-weight: 800; font-size: 1.1rem; line-height: 1.1; }
+.ile .ile-etoiles { font-size: .9rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.ile .ile-etoiles .barre { flex: 1; height: 10px; background: rgba(255, 255, 255, .35); }
+.ile .ile-etoiles .barre-remplie { background: #fff; }
+.fin-jour { text-align: center; background: #fff; border-radius: var(--rayon); padding: 16px; box-shadow: var(--ombre); }
+.fin-jour .gros-emoji { font-size: 3rem; }
+
+/* =====================================================================
+   6. JEU – structure commune
+   ===================================================================== */
+.jeu-haut { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; min-height: var(--haut-barre); }
+.mascotte-mini { font-size: 2.4rem; line-height: 1; }
+.mascotte-mini.saute { animation: sauter .6s ease; }
+.consigne {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255, 255, 255, .92); border-radius: 20px; padding: 10px 12px;
+  box-shadow: 0 4px 0 rgba(31, 42, 68, .1);
+}
+.consigne p { font-size: .95rem; font-weight: 700; }
+.zone { display: flex; flex-direction: column; gap: 14px; flex: 1; }
+.jeu-bas { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+.question { text-align: center; font-weight: 800; font-size: 1.05rem; }
+
+/* ---- carte de lecture (recto / verso) ---- */
+.carte3d { perspective: 1100px; height: clamp(260px, 40vh, 340px); height: clamp(260px, 40dvh, 340px); }
+.carte3d-int { position: relative; width: 100%; height: 100%; transition: transform .55s ease; transform-style: preserve-3d; }
+.carte3d.retournee .carte3d-int { transform: rotateY(180deg); }
+.face {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  padding: 16px;
+  background: #fff; border-radius: 28px; box-shadow: var(--ombre);
+  -webkit-backface-visibility: hidden; backface-visibility: hidden;
+}
+.face.verso { transform: rotateY(180deg); background: #fffbe8; }
+.carte3d:not(.retournee) .verso, .carte3d.retournee .recto { pointer-events: none; }
+.mot-lecture, .mot-colore { font-weight: 700; letter-spacing: .02em; text-align: center; line-height: 1.1; max-width: 100%; }
+.mot-lecture.xl, .mot-colore.xl { font-size: clamp(3.3rem, 21vw, 5.3rem); }
+.mot-lecture.l, .mot-colore.l { font-size: clamp(2.8rem, 16vw, 4.4rem); }
+.mot-lecture.m, .mot-colore.m { font-size: clamp(2.2rem, 12.5vw, 3.6rem); }
+.mot-colore { display: inline-flex; flex-wrap: wrap; justify-content: center; }
+.syl { padding: 0 2px; border-radius: 10px; }
+.syl-0 { color: var(--syl-0); }
+.syl-1 { color: var(--syl-1); }
+.syl-2 { color: var(--syl-2); }
+.syl-3 { color: var(--syl-3); }
+.mot-colore.cliquable .syl { cursor: pointer; }
+.mot-colore.cliquable .syl:active { background: rgba(31, 42, 68, .08); }
+.son { background: var(--son-surbrillance); border-radius: 8px; box-shadow: 0 0 0 2px var(--son-surbrillance); }
+.emoji-grand { font-size: clamp(3.6rem, 18vw, 5rem); line-height: 1; }
+.notes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.note-btn {
+  --c: var(--vert); --cf: var(--vert-fonce);
+  min-height: 84px; border: 0; border-radius: 20px; padding: 6px;
+  background: var(--c); box-shadow: 0 5px 0 var(--cf); color: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font-weight: 800; font-size: 1.1rem;
+}
+.note-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--cf); }
+.note-btn .note-emoji { font-size: 2rem; line-height: 1; }
+.note-btn .note-delai { font-size: .75rem; font-weight: 700; opacity: .92; }
+.note-btn.n1 { --c: var(--rouge); --cf: var(--rouge-fonce); }
+.note-btn.n2 { --c: var(--orange); --cf: var(--orange-fonce); }
+.note-btn.n3 { --c: var(--vert); --cf: var(--vert-fonce); }
+.note-btn.n4 { --c: var(--bleu); --cf: var(--bleu-fonce); }
+.note-btn[disabled] { opacity: .35; pointer-events: none; }
+
+.retour {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 14px; border-radius: 22px; background: #fff; box-shadow: var(--ombre);
+  font-weight: 800; font-size: 1.2rem; text-align: center;
+  animation: apparaitre .35s ease;
+}
+.retour .retour-emoji { font-size: 2.6rem; line-height: 1; }
+.retour .retour-xp { color: var(--orange-fonce); }
+
+/* ---- écriture : cases, tuiles ---- */
+.carte-ecriture {
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  background: #fff; border-radius: 28px; padding: 16px 12px; box-shadow: var(--ombre);
+}
+.carte-ecriture .emoji-grand { animation: flotter 3s ease-in-out infinite; }
+.cases {
+  --n: 3; --fs: 1.9rem;
+  display: grid; grid-template-columns: repeat(var(--n), minmax(0, 64px));
+  justify-content: center; gap: 8px; width: 100%;
+}
+.cases.syl { grid-template-columns: repeat(var(--n), minmax(0, 104px)); }
+.case {
+  height: 68px; padding: 0; min-width: 0;
+  border: 3px dashed #9fb3d1; border-radius: 16px; background: #f1f6ff;
+  font-weight: 800; font-size: var(--fs); color: var(--encre);
+}
+.case.pleine { border-style: solid; border-color: var(--bleu); background: #e7f0ff; }
+.case.juste { border-style: solid; border-color: var(--vert); background: #dcf7e8; color: var(--vert-fonce); }
+.case.indice { border-style: solid; border-color: var(--orange); background: #fff1d1; }
+.case.faux { border-style: solid; border-color: var(--rouge); background: #ffe1e2; color: var(--rouge-fonce); animation: secouer .45s ease; }
+.banque { --fs: 1.8rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.tuile {
+  min-width: 56px; height: 60px; padding: 0 14px;
+  border: 0; border-radius: 16px;
+  background: #ffe08a; box-shadow: 0 5px 0 #d9aa2b;
+  font-weight: 800; font-size: var(--fs); color: var(--encre);
+}
+.tuile:active { transform: translateY(4px); box-shadow: 0 1px 0 #d9aa2b; }
+.tuile.utilisee { visibility: hidden; }
+.outils { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.outils .btn { padding: 0 8px; font-size: 1rem; flex-direction: column; gap: 2px; min-height: 64px; }
+.outils .btn .outil-emoji { font-size: 1.5rem; line-height: 1; }
+.resultat { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; animation: apparaitre .35s ease; }
+.etoiles { font-size: 2.4rem; letter-spacing: .1em; }
+.etoiles .etoile-pop { display: inline-block; animation: pop .5s ease both; }
+.etoiles .etoile-pop:nth-child(2) { animation-delay: .15s; }
+.etoiles .etoile-pop:nth-child(3) { animation-delay: .3s; }
+.etoiles .vide { opacity: .25; filter: grayscale(1); }
+
+/* =====================================================================
+   7. BILAN, TRÉSORS, PARENTS
+   ===================================================================== */
+.bilan { display: flex; flex-direction: column; gap: 14px; text-align: center; }
+.bilan h1 { font-size: 1.7rem; }
+.stats-bilan { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.stat { background: #f5f8ff; border-radius: 16px; padding: 10px 4px; }
+.stat strong { display: block; font-size: 1.6rem; }
+.stat span { font-size: .8rem; color: var(--encre-douce); font-weight: 700; }
+.gain { background: #fff7d6; border-radius: 20px; padding: 12px; animation: apparaitre .5s ease; }
+.gain-ligne { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 14px; margin-top: 8px; }
+.gain-puce { display: flex; flex-direction: column; align-items: center; min-width: 64px; font-weight: 800; font-size: .9rem; }
+.gain-puce .gain-emoji { font-size: 2.6rem; line-height: 1; animation: sauter 1.2s ease infinite; }
+
+.grille-mascottes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.mascotte-case {
+  aspect-ratio: 1 / 1.1; border: 3px solid transparent; border-radius: 18px;
+  background: #f5f8ff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  padding: 2px; font-size: 2rem; line-height: 1;
+}
+.mascotte-case small { font-size: .62rem; font-weight: 800; color: var(--encre-douce); text-align: center; line-height: 1.1; }
+.mascotte-case.choisie { border-color: var(--primaire); background: #fff0e8; }
+.mascotte-case.verrou { filter: grayscale(1); opacity: .45; }
+.liste-badges { display: flex; flex-direction: column; gap: 8px; }
+.badge { display: flex; align-items: center; gap: 12px; background: #f5f8ff; border-radius: 16px; padding: 10px 12px; }
+.badge .badge-emoji { font-size: 2rem; line-height: 1; }
+.badge strong { display: block; }
+.badge.verrou { filter: grayscale(1); opacity: .5; }
+
+.garde { text-align: center; display: flex; flex-direction: column; gap: 14px; align-items: center; }
+.garde-btn {
+  position: relative; overflow: hidden;
+  min-height: 72px; width: 100%; border: 0; border-radius: 20px;
+  background: #e8edf7; box-shadow: 0 5px 0 #c3cee3; font-weight: 800; font-size: 1.1rem;
+}
+.garde-btn::before {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: 0;
+  background: rgba(47, 179, 109, .45);
+}
+.garde-btn.maintien::before { width: 100%; transition: width 1.5s linear; }
+.garde-btn span { position: relative; }
+.champ { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.champ label, .champ .libelle { font-weight: 800; }
+.champ input[type="text"], .champ select {
+  min-height: 48px; padding: 0 12px; border-radius: 12px; border: 2px solid #c3cee3; background: #fff; width: 100%;
+}
+.champ input[type="range"] { width: 100%; min-height: 44px; }
+.case-a-cocher { display: flex; align-items: center; gap: 12px; min-height: 48px; margin-bottom: 8px; font-weight: 700; }
+.case-a-cocher input { width: 26px; height: 26px; flex: none; }
+.ligne-carte { padding: 10px 0; border-bottom: 1px solid #e6ebf5; font-size: .88rem; overflow-wrap: anywhere; }
+.ligne-carte:last-child { border-bottom: 0; }
+.ligne-carte strong { font-size: 1rem; }
+.grille-etats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 8px; }
+.stats-parent { display: flex; flex-direction: column; gap: 10px; }
+
+/* =====================================================================
+   8. MODALE, TOAST, CONFETTIS
+   ===================================================================== */
+.modale-fond {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; background: rgba(31, 42, 68, .55);
+}
+.modale {
+  width: 100%; max-width: 440px; max-height: 88vh; max-height: 88dvh; overflow-y: auto;
+  background: #fff; border-radius: 26px; padding: 18px; box-shadow: 0 14px 40px rgba(0, 0, 0, .3);
+  display: flex; flex-direction: column; gap: 14px; animation: apparaitre .25s ease;
+}
+.modale h2 { font-size: 1.35rem; text-align: center; }
+.modale .modale-boutons { display: flex; flex-direction: column; gap: 10px; }
+.grille-ile { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mot-ile {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  min-height: 96px; padding: 8px 4px; border: 0; border-radius: 16px; background: #f5f8ff;
+  box-shadow: 0 4px 0 #c3cee3; font-weight: 800;
+}
+.mot-ile:active { transform: translateY(3px); box-shadow: 0 1px 0 #c3cee3; }
+.mot-ile .mi-emoji { font-size: 2.2rem; line-height: 1; }
+.mot-ile .mi-mot { font-size: .8rem; }
+.mot-ile .mi-etoiles { font-size: .8rem; }
+#toast {
+  position: fixed; left: 50%; bottom: max(90px, env(safe-area-inset-bottom)); z-index: 60;
+  transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none;
+  max-width: calc(100vw - 32px); padding: 12px 18px; border-radius: 999px;
+  background: var(--encre); color: #fff; font-weight: 700; text-align: center;
+  transition: opacity .25s ease, transform .25s ease;
+}
+#toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+#confettis { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 70; }
+
+/* =====================================================================
+   9. ANIMATIONS
+   ===================================================================== */
+@keyframes flotter { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes sauter { 0%, 100% { transform: translateY(0) scale(1); } 40% { transform: translateY(-14px) scale(1.2); } 70% { transform: translateY(0) scale(.95); } }
+@keyframes secouer { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(6px); } }
+@keyframes apparaitre { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes pop { 0% { transform: scale(0) rotate(-30deg); } 70% { transform: scale(1.35) rotate(8deg); } 100% { transform: scale(1) rotate(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+/* Petits écrans en hauteur (téléphone en paysage ou très compact) */
+@media (max-height: 640px) {
+  .mascotte-grande { font-size: 3.5rem; }
+  .emoji-grand { font-size: 3.2rem; }
+  .carte3d { height: 230px; }
+}
+</style>
+</head>
+<body data-vue="accueil">
+<div id="app">
+  <header class="entete" id="entete"></header>
+  <main id="scene" aria-live="off"></main>
+  <nav class="nav" id="nav" aria-label="Navigation principale"></nav>
+</div>
+<div id="annonce" class="visuellement-cache" role="status" aria-live="polite"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<canvas id="confettis" aria-hidden="true"></canvas>
+<div id="racine-modale"></div>
+
+<script>
+'use strict';
+
+/* =====================================================================
+   A. UTILITAIRES
+   ===================================================================== */
+const MIN = 60 * 1000;
+const JOUR_MS = 24 * 60 * MIN;
+const HEURE_DEBUT_JOUR = 4; // Comme Anki : la « journée » change à 4 h du matin (valeur par défaut d'Anki).
+
+/** Crée un élément DOM. Les textes passent par textContent / createTextNode (pas d'innerHTML). */
+function h(tag, attrs, ...enfants) {
+  const el = document.createElement(tag);
+  if (attrs) {
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v === null || v === undefined || v === false) continue;
+      if (k === 'class') el.className = v;
+      else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? '' : v);
+    }
+  }
+  for (const e of enfants.flat(Infinity)) {
+    if (e === null || e === undefined || e === false) continue;
+    el.append(e.nodeType ? e : document.createTextNode(String(e)));
+  }
+  return el;
+}
+const $ = (sel, racine = document) => racine.querySelector(sel);
+
+function melanger(t) {
+  const a = t.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+const choisir = (t) => t[Math.floor(Math.random() * t.length)];
+const borner = (x, a, b) => Math.min(b, Math.max(a, x));
+const echapperRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const pad2 = (n) => String(n).padStart(2, '0');
+
+/** Horloge du jeu : l'heure réelle + un décalage (en jours) utilisé par le bouton « simuler le lendemain » (espace parents). */
+function maintenant() { return Date.now() + (etat ? etat.decalageJours : 0) * JOUR_MS; }
+
+/** Début (ts) de la « journée » qui contient ts : 4 h du matin, heure locale. */
+function debutJour(ts) {
+  const d = new Date(ts);
+  d.setHours(HEURE_DEBUT_JOUR, 0, 0, 0);
+  if (d.getTime() > ts) d.setDate(d.getDate() - 1);
+  return d.getTime();
+}
+function ajouterJours(ts, n) { const d = new Date(ts); d.setDate(d.getDate() + n); return d.getTime(); }
+function cleJour(ts) {
+  const d = new Date(debutJour(ts));
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+}
+function ecartJours(cleA, cleB) {
+  const [ya, ma, da] = cleA.split('-').map(Number);
+  const [yb, mb, db] = cleB.split('-').map(Number);
+  return Math.round((Date.UTC(yb, mb - 1, db) - Date.UTC(ya, ma - 1, da)) / JOUR_MS);
+}
+function formaterDate(ts) {
+  return new Date(ts).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
+/* =====================================================================
+   B. DONNÉES PÉDAGOGIQUES (10 cartes de départ)
+   Champs statiques : id, niveau, type, ile, emoji, mot, syllabes, sons, unites, leurres, indiceAudio.
+   - sons    : graphèmes mis en surbrillance sur le verso (ex. "OU" dans POULE).
+   - unites  : briques à assembler en mode écriture (graphèmes, syllabes ou lettres), dans l'ordre.
+   - leurres : briques en trop (distracteurs) ajoutées à la banque.
+   Champs de répétition espacée (ajoutés à l'exécution) : intervalle, repetition, facilite,
+   prochaineRevision, etat, etape, lapses.
+   ===================================================================== */
+const CONSIGNE_LECTURE = 'Lis le mot à voix haute. Ensuite, retourne la carte.';
+
+const CARTES_DEPART = [
+  { id: 1, niveau: 'CP', type: 'ecriture', ile: 'sons', emoji: '🐱', mot: 'CHAT',
+    syllabes: ['CHAT'], sons: ['CH'], unites: ['CH', 'A', 'T'], leurres: ['S', 'OU'],
+    indiceAudio: 'Écris le mot : chat. Le petit animal qui fait miaou.' },
+  { id: 2, niveau: 'CP', type: 'lecture', ile: 'sons', emoji: '🧼', mot: 'SAVON',
+    syllabes: ['SA', 'VON'], sons: ['ON'], unites: [], leurres: [],
+    indiceAudio: CONSIGNE_LECTURE },
+  { id: 3, niveau: 'CP', type: 'lecture', ile: 'sons', emoji: '🐔', mot: 'POULE',
+    syllabes: ['POU', 'LE'], sons: ['OU'], unites: [], leurres: [],
+    indiceAudio: CONSIGNE_LECTURE },
+  { id: 4, niveau: 'CP', type: 'ecriture', ile: 'sons', emoji: '🍐', mot: 'POIRE',
+    syllabes: ['POI', 'RE'], sons: ['OI'], unites: ['POI', 'RE'], leurres: ['ROI', 'LA'],
+    indiceAudio: 'Écris le mot : poire. Un fruit jaune et sucré. Assemble les syllabes.' },
+  { id: 5, niveau: 'CP', type: 'lecture', ile: 'sons', emoji: '👑', mot: 'ROI',
+    syllabes: ['ROI'], sons: ['OI'], unites: [], leurres: [],
+    indiceAudio: CONSIGNE_LECTURE },
+  { id: 6, niveau: 'CP', type: 'lecture', ile: 'outils', emoji: '🤝', mot: 'AVEC',
+    syllabes: ['A', 'VEC'], sons: [], unites: [], leurres: [],
+    indiceAudio: 'Lis le petit mot. On le dit dans : je joue avec toi.' },
+  { id: 7, niveau: 'CP', type: 'ecriture', ile: 'mots', emoji: '🌙', mot: 'LUNE',
+    syllabes: ['LU', 'NE'], sons: [], unites: ['LU', 'NE'], leurres: ['LA', 'NU'],
+    indiceAudio: 'Écris le mot : lune. Elle brille la nuit dans le ciel. Assemble les syllabes.' },
+  { id: 8, niveau: 'CE1', type: 'lecture', ile: 'mots', emoji: '🎈', mot: 'BALLON',
+    syllabes: ['BAL', 'LON'], sons: ['ON'], unites: [], leurres: [],
+    indiceAudio: CONSIGNE_LECTURE },
+  { id: 9, niveau: 'CE1', type: 'ecriture', ile: 'mots', emoji: '🏠', mot: 'MAISON',
+    syllabes: ['MAI', 'SON'], sons: ['AI', 'ON'], unites: ['M', 'A', 'I', 'S', 'O', 'N'], leurres: ['E', 'U', 'L', 'R'],
+    indiceAudio: 'Écris le mot : maison. C\'est là où tu habites. Choisis les lettres.' },
+  { id: 10, niveau: 'CE1', type: 'lecture', ile: 'outils', emoji: '❓', mot: 'POURQUOI',
+    syllabes: ['POUR', 'QUOI'], sons: ['OU', 'OI'], unites: [], leurres: [],
+    indiceAudio: 'Lis le mot à voix haute. On le dit pour poser une question.' }
+];
+
+const ILES = [
+  { id: 'sons', nom: 'Île des Sons', emoji: '🏝️', couleur: '#2f80ed', fonce: '#1c5fba' },
+  { id: 'outils', nom: 'Île des Mots-Outils', emoji: '🧰', couleur: '#8b5cf6', fonce: '#6a3fd1' },
+  { id: 'mots', nom: 'Île des Mots Malins', emoji: '🏰', couleur: '#e5484d', fonce: '#b92f34' }
+];
+
+const MASCOTTES = [
+  { id: 'renard', emoji: '🦊', nom: 'Roux', xp: 0 },
+  { id: 'hibou', emoji: '🦉', nom: 'Hugo', xp: 25 },
+  { id: 'pieuvre', emoji: '🐙', nom: 'Poppy', xp: 60 },
+  { id: 'panda', emoji: '🐼', nom: 'Pandi', xp: 110 },
+  { id: 'licorne', emoji: '🦄', nom: 'Lila', xp: 180 },
+  { id: 'dragon', emoji: '🐲', nom: 'Drago', xp: 270 },
+  { id: 'dauphin', emoji: '🐬', nom: 'Dodo', xp: 380 },
+  { id: 'lion', emoji: '🦁', nom: 'Léo', xp: 520 }
+];
+
+const NOTES = [
+  { note: 1, emoji: '🔁', label: 'Encore', classe: 'n1', xp: 1 },
+  { note: 2, emoji: '😅', label: 'Presque', classe: 'n2', xp: 3 },
+  { note: 3, emoji: '😊', label: 'Bien', classe: 'n3', xp: 5 },
+  { note: 4, emoji: '🤩', label: 'Facile !', classe: 'n4', xp: 8 }
+];
+
+const BADGES = [
+  { id: 'premier-pas', emoji: '👣', nom: 'Premier pas', desc: 'Répondre à ta première carte.', ok: () => etat.compteurs.reponses >= 1 },
+  { id: 'lecteur', emoji: '📖', nom: 'Petit lecteur', desc: 'Bien lire 10 mots.', ok: () => etat.compteurs.lecture >= 10 },
+  { id: 'ecrivain', emoji: '✏️', nom: 'Petit écrivain', desc: 'Écrire 10 mots avec succès.', ok: () => etat.compteurs.ecriture >= 10 },
+  { id: 'sans-faute', emoji: '💎', nom: 'Sans faute', desc: 'Écrire 3 mots de suite sans erreur ni aide.', ok: () => etat.compteurs.parfaitsDAffilee >= 3 },
+  { id: 'journee', emoji: '🏆', nom: 'Journée réussie', desc: 'Terminer toutes les cartes du jour.', ok: () => etat.compteurs.journees >= 1 },
+  { id: 'serie3', emoji: '🔥', nom: '3 jours de suite', desc: 'Jouer 3 jours de suite.', ok: () => etat.serie.n >= 3 },
+  { id: 'serie7', emoji: '🌟', nom: '7 jours de suite', desc: 'Jouer 7 jours de suite.', ok: () => etat.serie.n >= 7 }
+];
+
+const PHRASES_BRAVO = ['Bravo !', 'Super !', 'Bien joué !', 'Excellent !'];
+const PHRASES_COURAGE = ['Courage !', 'Presque !', 'Tu y es presque !'];
+const PHRASES_REVOIR = ['Pas grave, on va le revoir.', 'On va réessayer plus tard.'];
+
+/** Contrôle de cohérence des données (alerte en console seulement). */
+function verifierDonnees() {
+  for (const c of CARTES_DEPART) {
+    if (c.syllabes.join('') !== c.mot) console.warn('Carte', c.id, ': les syllabes ne recomposent pas le mot');
+    if (c.type === 'ecriture') {
+      if (c.unites.join('') !== c.mot) console.warn('Carte', c.id, ': les unités ne recomposent pas le mot');
+      if (c.leurres.some((l) => c.unites.includes(l))) console.warn('Carte', c.id, ': un leurre est identique à une unité');
+    }
+  }
+}
+
+/* =====================================================================
+   C. MOTEUR DE RÉPÉTITION ESPACÉE (inspiré d'Anki / SM-2)
+   Notes : 1 = À revoir (Again), 2 = Difficile (Hard), 3 = Bien (Good), 4 = Facile (Easy)
+   Sources :
+   - SM-2 : P. Wozniak, SuperMemo, https://super-memory.com/english/ol/sm2.htm (facilité initiale 2,5 ; plancher 1,3).
+   - Anki (algorithme par défaut = SM-2 modifié) : https://faqs.ankiweb.net/what-spaced-repetition-algorithm.html
+   - Anki manuel (pas 1m 10m, « Difficile » au 1er pas = moyenne des 2 premiers pas, anticipation 20 min,
+     journée à 4 h) : https://docs.ankiweb.net/deck-options.html
+   Non vérifié dans la doc officielle : intervalle de diplôme 1 j, intervalle « Facile » 4 j, bonus 1,3
+   (valeurs relevées sur un miroir tiers) et plancher de facilité 1,3 côté Anki.
+   Non implémenté : prise en compte des jours de retard et « fuzz » aléatoire des intervalles.
+   ===================================================================== */
+const SRS = {
+  AGAIN: 1, HARD: 2, GOOD: 3, EASY: 4,
+  PAS_APPRENTISSAGE: [1, 10],     // minutes
+  PAS_REAPPRENTISSAGE: [10],      // minutes
+  INTERVALLE_DIPLOME: 1,          // jours, après le dernier pas d'apprentissage
+  INTERVALLE_FACILE: 4,           // jours, « Facile » sur une carte en apprentissage
+  FACILITE_DEPART: 2.5,
+  FACILITE_MIN: 1.3,
+  BONUS_FACILE: 1.3,
+  COEF_DIFFICILE: 1.2,
+  COEF_ECHEC: 0,                  // nouvel intervalle après un échec = ancien × 0, avec minimum 1 jour
+  INTERVALLE_MAX: 365,
+  ANTICIPATION_MIN: 20,           // minutes : cartes en apprentissage montrées un peu en avance
+  CHAMPS: ['intervalle', 'repetition', 'facilite', 'prochaineRevision', 'etat', 'etape', 'lapses'],
+
+  etatInitial(ts) {
+    return { intervalle: 0, repetition: 0, facilite: SRS.FACILITE_DEPART, prochaineRevision: ts, etat: 'nouvelle', etape: 0, lapses: 0 };
+  },
+
+  /** Retourne les nouveaux champs SRS de la carte après la réponse `note` (fonction pure : ne modifie pas la carte). */
+  planifier(c, note, now) {
+    const r = {};
+    for (const k of SRS.CHAMPS) r[k] = c[k];
+
+    if (c.etat === 'revision') {
+      const ivl = c.intervalle;
+      if (note === SRS.AGAIN) {
+        r.lapses = c.lapses + 1;
+        r.repetition = 0;
+        r.facilite = Math.max(SRS.FACILITE_MIN, c.facilite - 0.20);
+        r.intervalle = borner(Math.round(ivl * SRS.COEF_ECHEC), 1, SRS.INTERVALLE_MAX);
+        r.etat = 'reapprentissage';
+        r.etape = 0;
+        r.prochaineRevision = now + SRS.PAS_REAPPRENTISSAGE[0] * MIN;
+        return r;
+      }
+      // Tous les nouveaux intervalles (hors échec) sont au moins 1 jour plus longs que le précédent,
+      // et Difficile < Bien < Facile (d'après la FAQ Anki).
+      const difficile = Math.max(Math.round(ivl * SRS.COEF_DIFFICILE), ivl + 1);
+      const bien = Math.max(Math.round(ivl * c.facilite), difficile + 1);
+      const facile = Math.max(Math.round(ivl * c.facilite * SRS.BONUS_FACILE), bien + 1);
+      let nouvel = bien;
+      if (note === SRS.HARD) { nouvel = difficile; r.facilite = Math.max(SRS.FACILITE_MIN, c.facilite - 0.15); }
+      if (note === SRS.EASY) { nouvel = facile; r.facilite = c.facilite + 0.15; }
+      r.intervalle = Math.min(SRS.INTERVALLE_MAX, nouvel);
+      r.repetition = c.repetition + 1;
+      r.prochaineRevision = ajouterJours(debutJour(now), r.intervalle);
+      return r;
+    }
+
+    // Carte nouvelle, en apprentissage ou en réapprentissage : pas en minutes
+    const re = c.etat === 'reapprentissage';
+    const pas = re ? SRS.PAS_REAPPRENTISSAGE : SRS.PAS_APPRENTISSAGE;
+    const etape = c.etat === 'nouvelle' ? 0 : borner(c.etape, 0, pas.length - 1);
+    const etatApprenant = re ? 'reapprentissage' : 'apprentissage';
+
+    if (note === SRS.AGAIN) {
+      r.etat = etatApprenant; r.etape = 0;
+      r.prochaineRevision = now + pas[0] * MIN;
+    } else if (note === SRS.HARD) {
+      r.etat = etatApprenant; r.etape = etape;
+      const delai = (etape === 0 && pas.length > 1) ? (pas[0] + pas[1]) / 2 : pas[etape];
+      r.prochaineRevision = now + delai * MIN;
+    } else if (note === SRS.GOOD && etape + 1 < pas.length) {
+      r.etat = etatApprenant; r.etape = etape + 1;
+      r.prochaineRevision = now + pas[etape + 1] * MIN;
+    } else {
+      // Bien sur le dernier pas, ou Facile : la carte « diplôme » et devient une carte de révision
+      let ivl;
+      if (re) ivl = note === SRS.EASY ? Math.max(1, c.intervalle) + 1 : Math.max(1, c.intervalle);
+      else ivl = note === SRS.EASY ? SRS.INTERVALLE_FACILE : SRS.INTERVALLE_DIPLOME;
+      r.etat = 'revision'; r.etape = 0;
+      r.intervalle = ivl;
+      r.repetition = c.repetition + 1;
+      r.prochaineRevision = ajouterJours(debutJour(now), ivl);
+    }
+    return r;
+  },
+
+  /** Libellé court du délai avant la prochaine révision (affiché dans l'espace parents). */
+  libelleDelai(c, r, now) {
+    if (r.etat !== 'revision') {
+      const m = Math.round((r.prochaineRevision - now) / MIN);
+      return m < 1 ? '<1 min' : m + ' min';
+    }
+    const j = Math.round((r.prochaineRevision - debutJour(now)) / JOUR_MS);
+    if (j >= 30) return (Math.round(j / 3) / 10).toString().replace('.', ',') + ' mois';
+    return j + ' j';
+  },
+  apercu(c, now) { return [1, 2, 3, 4].map((n) => SRS.libelleDelai(c, SRS.planifier(c, n, now), now)); },
+
+  estEnApprentissage(c) { return c.etat === 'apprentissage' || c.etat === 'reapprentissage'; },
+  /** Niveau de maîtrise 0-3 : ≥1 j, ≥7 j, ≥21 j (seuil « mature » d'Anki). */
+  maitrise(c) {
+    if (c.etat === 'reapprentissage') return 1;
+    if (c.etat !== 'revision') return 0;
+    return c.intervalle >= 21 ? 3 : c.intervalle >= 7 ? 2 : 1;
+  }
+};
+
+/* =====================================================================
+   D. ÉTAT ET SAUVEGARDE (localStorage)
+   ===================================================================== */
+const CLE_STOCKAGE = 'iles-des-mots-v1';
+let stockageOk = true;
+let etat = null;
+const CARTES = CARTES_DEPART.map((c) => Object.assign({}, c, SRS.etatInitial(Date.now())));
+
+function etatParDefaut() {
+  return {
+    version: 1,
+    cartes: {},
+    profil: { prenom: '', mascotte: 'renard', xp: 0 },
+    jour: { cle: '', nouvelles: [], validees: [], termine: false },
+    serie: { derniere: null, n: 0 },
+    badges: [],
+    compteurs: { reponses: 0, lecture: 0, ecriture: 0, parfaitsDAffilee: 0, journees: 0 },
+    reglages: { son: true, voix: true, vitesse: 0.85, voixNom: '', nouvellesParJour: 10, delais: false },
+    decalageJours: 0
+  };
+}
+function fusionner(base, src) {
+  if (!src || typeof src !== 'object') return base;
+  for (const k of Object.keys(base)) {
+    if (!(k in src)) continue;
+    const b = base[k], s = src[k];
+    if (b && typeof b === 'object' && !Array.isArray(b) && Object.keys(b).length === 0 && s && typeof s === 'object') base[k] = s; // dictionnaire à clés dynamiques (cartes)
+    else if (b && typeof b === 'object' && !Array.isArray(b) && s && typeof s === 'object') base[k] = fusionner(b, s);
+    else if (typeof b === typeof s || b === null) base[k] = s;
+  }
+  return base;
+}
+function appliquerSauvegarde() {
+  for (const c of CARTES) {
+    const s = etat.cartes[c.id];
+    if (!s) continue;
+    for (const k of SRS.CHAMPS) {
+      if (k in s && (typeof s[k] === typeof c[k])) c[k] = s[k];
+    }
+  }
+}
+function chargerEtat() {
+  let brut = null;
+  try { brut = window.localStorage.getItem(CLE_STOCKAGE); } catch (e) { stockageOk = false; }
+  let e = etatParDefaut();
+  if (brut) { try { e = fusionner(e, JSON.parse(brut)); } catch (err) { e = etatParDefaut(); } }
+  return e;
+}
+function sauver() {
+  for (const c of CARTES) {
+    const o = {};
+    for (const k of SRS.CHAMPS) o[k] = c[k];
+    etat.cartes[c.id] = o;
+  }
+  try { window.localStorage.setItem(CLE_STOCKAGE, JSON.stringify(etat)); }
+  catch (e) { stockageOk = false; }
+}
+function majJour() {
+  const cle = cleJour(maintenant());
+  if (etat.jour.cle !== cle) etat.jour = { cle, nouvelles: [], validees: [], termine: false };
+}
+
+/* =====================================================================
+   E. FILE DU JOUR (choix de la prochaine carte)
+   ===================================================================== */
+const MAX_PASSAGES = 4; // une même carte n'est pas représentée plus de 4 fois par séance (évite la frustration)
+
+function quotaNouvelles() { return Math.max(0, etat.reglages.nouvellesParJour - etat.jour.nouvelles.length); }
+
+function prochaineCarte(now, dernierId, passages) {
+  const ok = (c) => (passages[c.id] || 0) < MAX_PASSAGES;
+  const parDate = (a, b) => a.prochaineRevision - b.prochaineRevision;
+  const apprenantes = CARTES.filter((c) => ok(c) && SRS.estEnApprentissage(c) && c.prochaineRevision <= now).sort(parDate);
+  const revisions = melanger(CARTES.filter((c) => ok(c) && c.etat === 'revision' && c.prochaineRevision <= now)).sort(parDate);
+  const nouvelles = CARTES.filter((c) => ok(c) && c.etat === 'nouvelle').slice(0, quotaNouvelles());
+  const anticipees = CARTES.filter((c) => ok(c) && SRS.estEnApprentissage(c) && c.prochaineRevision > now
+    && c.prochaineRevision <= now + SRS.ANTICIPATION_MIN * MIN).sort(parDate);
+  const tous = [...apprenantes, ...revisions, ...nouvelles, ...anticipees];
+  return tous.find((c) => c.id !== dernierId) || tous[0] || null;
+}
+
+/** Cartes qui restent à valider aujourd'hui (apprentissage, révisions dues, nouvelles dans le quota). */
+function restantAujourdhui(now) {
+  let n = 0;
+  for (const c of CARTES) {
+    if (c.etat === 'nouvelle') continue;
+    if (c.etat === 'revision') { if (c.prochaineRevision <= now) n++; } else n++;
+  }
+  n += Math.min(CARTES.filter((c) => c.etat === 'nouvelle').length, quotaNouvelles());
+  return n;
+}
+function progressionJour(now) {
+  const fait = etat.jour.validees.length;
+  return { fait, total: fait + restantAujourdhui(now) };
+}
+
+/* =====================================================================
+   F. SON (Web Audio API) ET VOIX (speechSynthesis)
+   ===================================================================== */
+const Son = {
+  ctx: null,
+  debloquer() {
+    try {
+      if (!this.ctx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        this.ctx = new AC();
+      }
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+    } catch (e) { /* audio indisponible */ }
+  },
+  ton(freq, debut, duree, type, volume, glisse) {
+    const ctx = this.ctx;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, debut);
+    if (glisse) osc.frequency.exponentialRampToValueAtTime(glisse, debut + duree);
+    gain.gain.setValueAtTime(0.0001, debut);
+    gain.gain.exponentialRampToValueAtTime(volume || 0.15, debut + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, debut + duree);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(debut);
+    osc.stop(debut + duree + 0.05);
+  },
+  jouer(nom) {
+    if (!etat || !etat.reglages.son) return;
+    this.debloquer();
+    if (!this.ctx) return;
+    try {
+      const t = this.ctx.currentTime + 0.01;
+      switch (nom) {
+        case 'clic': this.ton(660, t, 0.07, 'triangle', 0.12); break;
+        case 'pose': this.ton(520, t, 0.08, 'sine', 0.16); this.ton(780, t + 0.05, 0.08, 'sine', 0.12); break;
+        case 'retourne': this.ton(380, t, 0.12, 'triangle', 0.14, 700); break;
+        case 'ok': this.ton(523.25, t, 0.14, 'triangle', 0.16); this.ton(659.25, t + 0.12, 0.2, 'triangle', 0.16); break;
+        case 'doux': this.ton(392, t, 0.16, 'sine', 0.14); this.ton(330, t + 0.14, 0.24, 'sine', 0.12); break;
+        case 'erreur': this.ton(240, t, 0.16, 'triangle', 0.14, 170); this.ton(190, t + 0.15, 0.22, 'triangle', 0.12, 150); break;
+        case 'bravo': [523.25, 659.25, 783.99].forEach((f, i) => this.ton(f, t + i * 0.09, 0.2, 'triangle', 0.17)); break;
+        case 'super': [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => this.ton(f, t + i * 0.09, 0.26, 'triangle', 0.17)); break;
+        case 'fanfare': [523.25, 659.25, 783.99, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => this.ton(f, t + i * 0.11, 0.3, 'square', 0.09)); break;
+        default: break;
+      }
+    } catch (e) { /* ignorer */ }
+  }
+};
+
+const Voix = {
+  dispo: ('speechSynthesis' in window) && (typeof SpeechSynthesisUtterance !== 'undefined'),
+  liste: [],
+  voix: null,
+  init() {
+    if (!this.dispo) return;
+    const maj = () => {
+      try {
+        this.liste = window.speechSynthesis.getVoices().filter((v) => /^fr(a)?([-_]|$)/i.test(v.lang));
+        this.choisir();
+      } catch (e) { /* ignorer */ }
+    };
+    maj();
+    if (typeof window.speechSynthesis.addEventListener === 'function') window.speechSynthesis.addEventListener('voiceschanged', maj);
+    else window.speechSynthesis.onvoiceschanged = maj;
+  },
+  choisir() {
+    const nom = etat ? etat.reglages.voixNom : '';
+    this.voix = this.liste.find((v) => v.name === nom)
+      || this.liste.find((v) => /^fr[-_]FR$/i.test(v.lang))
+      || this.liste[0] || null;
+  },
+  /** Lit un texte (ou une suite de textes) en français. Interrompt la lecture en cours. */
+  dire(textes) {
+    if (!this.dispo || !etat || !etat.reglages.voix) return;
+    const liste = (Array.isArray(textes) ? textes : [textes]).filter(Boolean);
+    try {
+      window.speechSynthesis.cancel();
+      for (const t of liste) {
+        const u = new SpeechSynthesisUtterance(t);
+        u.lang = 'fr-FR';
+        if (this.voix) u.voice = this.voix;
+        u.rate = etat.reglages.vitesse;
+        u.pitch = 1.05;
+        window.speechSynthesis.speak(u);
+      }
+    } catch (e) { /* ignorer */ }
+  },
+  stop() { try { if (this.dispo) window.speechSynthesis.cancel(); } catch (e) { /* ignorer */ } }
+};
+/** Texte lu par la synthèse vocale pour un mot (minuscules : meilleure prononciation que les capitales). */
+const motParle = (c) => c.mot.toLowerCase();
+
+/* =====================================================================
+   G. CONFETTIS (canvas)
+   ===================================================================== */
+const Confettis = {
+  particules: [],
+  actif: false,
+  dernier: 0,
+  lancer(n) {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const canvas = $('#confettis');
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(window.innerWidth * dpr);
+    canvas.height = Math.round(window.innerHeight * dpr);
+    this.dpr = dpr;
+    const couleurs = ['#ff7a45', '#ffd23f', '#2fb36d', '#2f80ed', '#8b5cf6', '#e5484d', '#ff8fb8'];
+    for (let i = 0; i < n; i++) {
+      this.particules.push({
+        x: window.innerWidth * (0.2 + Math.random() * 0.6),
+        y: window.innerHeight * 0.35,
+        vx: (Math.random() - 0.5) * 9,
+        vy: -4 - Math.random() * 9,
+        taille: 6 + Math.random() * 7,
+        rot: Math.random() * Math.PI * 2,
+        vr: (Math.random() - 0.5) * 0.4,
+        couleur: choisir(couleurs),
+        rond: Math.random() < 0.3
+      });
+    }
+    if (!this.actif) { this.actif = true; this.dernier = performance.now(); requestAnimationFrame((t) => this.boucle(t)); }
+  },
+  boucle(t) {
+    const canvas = $('#confettis');
+    const ctx = canvas.getContext('2d');
+    const dt = Math.min(2, (t - this.dernier) / 16.67);
+    this.dernier = t;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.scale(this.dpr, this.dpr);
+    this.particules = this.particules.filter((p) => p.y < window.innerHeight + 30);
+    for (const p of this.particules) {
+      p.vy += 0.28 * dt; p.vx *= 0.995;
+      p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt;
+      ctx.save();
+      ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      ctx.fillStyle = p.couleur;
+      if (p.rond) { ctx.beginPath(); ctx.arc(0, 0, p.taille / 2, 0, Math.PI * 2); ctx.fill(); }
+      else ctx.fillRect(-p.taille / 2, -p.taille / 3, p.taille, p.taille * 0.66);
+      ctx.restore();
+    }
+    if (this.particules.length) requestAnimationFrame((tt) => this.boucle(tt));
+    else { this.actif = false; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height); }
+  }
+};
+
+/* =====================================================================
+   H. MODALE, TOAST, ANNONCES
+   ===================================================================== */
+let modaleOuverte = null;
+function fermerModale() {
+  if (modaleOuverte) { modaleOuverte.fond.remove(); document.removeEventListener('keydown', modaleOuverte.touche); modaleOuverte = null; }
+}
+/** Ouvre une boîte de dialogue. `boutons` : [{ label, classe, action }]. */
+function ouvrirModale(titre, contenu, boutons) {
+  fermerModale();
+  const zoneBoutons = h('div', { class: 'modale-boutons' }, (boutons || []).map((b) =>
+    h('button', { class: 'btn btn-moyen ' + (b.classe || ''), type: 'button', onclick: () => { if (b.action) b.action(); if (!b.garder) fermerModale(); } }, b.label)));
+  const boite = h('div', { class: 'modale', role: 'dialog', 'aria-modal': 'true', 'aria-label': titre },
+    h('h2', {}, titre), contenu, zoneBoutons);
+  const fond = h('div', { class: 'modale-fond' }, boite);
+  fond.addEventListener('click', (e) => { if (e.target === fond) fermerModale(); });
+  const touche = (e) => { if (e.key === 'Escape') fermerModale(); };
+  document.addEventListener('keydown', touche);
+  $('#racine-modale').append(fond);
+  modaleOuverte = { fond, touche };
+  const premier = boite.querySelector('button');
+  if (premier) premier.focus({ preventScroll: true });
+}
+let minuteurToast = null;
+function toast(msg, duree) {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.add('visible');
+  clearTimeout(minuteurToast);
+  minuteurToast = setTimeout(() => el.classList.remove('visible'), duree || 2400);
+}
+function annoncer(msg) { $('#annonce').textContent = msg; }
+
+/* =====================================================================
+   I. COMPOSANTS D'AFFICHAGE
+   ===================================================================== */
+const mascotteCourante = () => MASCOTTES.find((m) => m.id === etat.profil.mascotte) || MASCOTTES[0];
+const mascottesDebloquees = () => MASCOTTES.filter((m) => etat.profil.xp >= m.xp);
+const classeTaille = (mot) => (mot.length <= 4 ? 'xl' : mot.length <= 6 ? 'l' : 'm');
+
+function barre(fait, total, fine) {
+  const pct = total > 0 ? Math.round((fait / total) * 100) : 0;
+  return h('div', { class: 'barre' + (fine ? ' fine' : ''), role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': String(total), 'aria-valuenow': String(fait) },
+    h('div', { class: 'barre-remplie', style: 'width:' + pct + '%' }));
+}
+
+/** Découpe un texte en fragments, en entourant les graphèmes `sons` d'un <span class="son">. */
+function surligner(texte, sons) {
+  if (!sons || !sons.length) return [document.createTextNode(texte)];
+  const re = new RegExp('(' + sons.slice().sort((a, b) => b.length - a.length).map(echapperRegex).join('|') + ')', 'g');
+  return texte.split(re).filter((p) => p !== '').map((p) => (sons.includes(p) ? h('span', { class: 'son' }, p) : document.createTextNode(p)));
+}
+/** Mot avec syllabes colorées (alternance de 4 couleurs) et graphèmes cibles surlignés. */
+function motColore(c, cliquable) {
+  const el = h('div', { class: 'mot-colore ' + classeTaille(c.mot) + (cliquable ? ' cliquable' : ''), 'aria-label': c.mot.toLowerCase() });
+  c.syllabes.forEach((syl, i) => {
+    const s = h('span', { class: 'syl syl-' + (i % 4), 'aria-hidden': 'true' }, surligner(syl, c.sons));
+    if (cliquable) s.addEventListener('click', () => { Son.jouer('clic'); Voix.dire(syl.toLowerCase()); });
+    el.append(s);
+  });
+  return el;
+}
+
+/* =====================================================================
+   J. NAVIGATION ET ÉCRANS
+   ===================================================================== */
+let vue = 'accueil';
+let parentsOuvert = false;
+let S = null; // séance en cours (ou dernière séance terminée, pour le bilan)
+
+const scene = () => $('#scene');
+
+function aller(nom) {
+  Voix.stop();
+  if (nom !== 'parents') parentsOuvert = false;
+  vue = nom;
+  majJour();
+  document.body.dataset.vue = nom;
+  const s = scene();
+  s.replaceChildren();
+  ({ accueil: vueAccueil, tresors: vueTresors, parents: vueParents, bilan: vueBilan }[nom])(s);
+  majEntete();
+  majNav();
+  window.scrollTo(0, 0);
+}
+
+function majEntete() {
+  const e = $('#entete');
+  const serieActuelle = serieAffichee();
+  const muet = !etat.reglages.son && !etat.reglages.voix;
+  e.replaceChildren(...[
+    h('div', { class: 'logo' }, h('span', { class: 'logo-emoji', 'aria-hidden': 'true' }, '🏝️'), h('span', {}, 'Les Îles des Mots')),
+    etat.decalageJours ? h('span', { class: 'puce puce-test', title: 'Jours simulés (espace parents)' }, '🧪+' + etat.decalageJours) : null,
+    h('span', { class: 'puce', 'aria-label': 'Série de ' + serieActuelle + ' jours' }, '🔥 ' + serieActuelle),
+    h('span', { class: 'puce', 'aria-label': etat.profil.xp + ' étoiles gagnées' }, '⭐ ' + etat.profil.xp),
+    h('button', {
+      class: 'puce', type: 'button', 'aria-label': muet ? 'Activer le son et la voix' : 'Couper le son et la voix',
+      onclick: () => {
+        const nouveau = muet; // si muet → on active, sinon on coupe
+        etat.reglages.son = nouveau; etat.reglages.voix = nouveau;
+        sauver(); majEntete();
+        if (nouveau) { Son.jouer('ok'); }
+      }
+    }, muet ? '🔇' : '🔊')
+  ].filter(Boolean)); // replaceChildren(null) écrirait la chaîne « null » : on retire les éléments absents
+}
+function majNav() {
+  const items = [['accueil', '🗺️', 'Aventure'], ['tresors', '🏆', 'Trésors'], ['parents', '⚙️', 'Parents']];
+  $('#nav').replaceChildren(...items.map(([id, emoji, label]) =>
+    h('button', { type: 'button', 'aria-current': vue === id ? 'page' : null, onclick: () => { Son.jouer('clic'); aller(id); } },
+      h('span', { class: 'nav-emoji', 'aria-hidden': 'true' }, emoji), label)));
+}
+
+function serieAffichee() {
+  if (!etat.serie.derniere) return 0;
+  const ecart = ecartJours(etat.serie.derniere, cleJour(maintenant()));
+  return ecart <= 1 ? etat.serie.n : 0;
+}
+
+/* ------------------------------ ACCUEIL ------------------------------ */
+function vueAccueil(s) {
+  const now = maintenant();
+  const m = mascotteCourante();
+  const prenom = etat.profil.prenom.trim();
+  const salut = prenom ? 'Salut ' + prenom + ' ! On part à l\'aventure ?' : 'Salut ! On part à l\'aventure ?';
+  const { fait, total } = progressionJour(now);
+  const disponible = prochaineCarte(now, null, {}) !== null;
+
+  s.append(
+    h('section', { class: 'heros' },
+      h('div', { class: 'mascotte-grande', 'aria-hidden': 'true' }, m.emoji),
+      h('div', { class: 'bulle' },
+        h('p', {}, salut),
+        h('button', { class: 'btn btn-rond btn-bleu', type: 'button', 'aria-label': 'Écouter le message', onclick: () => { Son.jouer('clic'); Voix.dire(salut); } }, '🔊'))),
+    h('section', { class: 'panneau jour' },
+      h('div', { class: 'ligne' }, h('strong', {}, 'Aujourd\'hui'), h('span', {}, total ? fait + ' / ' + total + ' cartes' : 'Rien à faire')),
+      barre(fait, total))
+  );
+
+  if (disponible) {
+    s.append(h('button', { class: 'btn btn-gros btn-vert', type: 'button', onclick: () => { Son.jouer('ok'); demarrerSeance({ libre: false }); } }, '▶ JOUER'));
+  } else {
+    s.append(h('section', { class: 'fin-jour' },
+      h('div', { class: 'gros-emoji', 'aria-hidden': 'true' }, '🎉'),
+      h('p', {}, h('strong', {}, 'Bravo ! C\'est fini pour aujourd\'hui.')),
+      h('p', { class: 'petit' }, 'Reviens demain : les mots reviendront au bon moment.'),
+      h('div', { style: 'margin-top:12px' }, h('button', { class: 'btn btn-moyen btn-bleu', type: 'button', onclick: () => demarrerSeance({ libre: true, liste: melanger(CARTES).slice(0, 5) }) }, '🎲 Jeu libre'))));
+  }
+
+  s.append(h('section', { class: 'iles' },
+    h('h2', {}, 'Ma carte des îles'),
+    ILES.map((ile) => {
+      const cartes = CARTES.filter((c) => c.ile === ile.id);
+      const pts = cartes.reduce((t, c) => t + SRS.maitrise(c), 0);
+      return h('button', {
+        class: 'ile', type: 'button', style: '--ile-c:' + ile.couleur + ';--ile-cf:' + ile.fonce,
+        'aria-label': ile.nom + ', ' + pts + ' étoiles sur ' + cartes.length * 3,
+        onclick: () => { Son.jouer('clic'); ouvrirIle(ile); }
+      },
+        h('span', { class: 'ile-emoji', 'aria-hidden': 'true' }, ile.emoji),
+        h('span', { class: 'ile-nom' }, ile.nom),
+        h('span', { class: 'ile-etoiles' }, '⭐ ' + pts + '/' + cartes.length * 3, barre(pts, cartes.length * 3, true)));
+    })));
+}
+
+function ouvrirIle(ile) {
+  const cartes = CARTES.filter((c) => c.ile === ile.id);
+  const grille = h('div', { class: 'grille-ile' }, cartes.map((c) => {
+    const n = SRS.maitrise(c);
+    return h('button', { class: 'mot-ile', type: 'button', 'aria-label': 'S\'entraîner sur ' + c.mot.toLowerCase(),
+      onclick: () => { fermerModale(); demarrerSeance({ libre: true, liste: [c] }); } },
+      h('span', { class: 'mi-emoji', 'aria-hidden': 'true' }, c.emoji),
+      h('span', { class: 'mi-mot' }, c.type === 'ecriture' ? '✏️ écrire' : '📖 lire'),
+      h('span', { class: 'mi-etoiles', 'aria-hidden': 'true' }, '⭐'.repeat(n) + '☆'.repeat(3 - n)));
+  }));
+  ouvrirModale(ile.emoji + ' ' + ile.nom, h('div', {}, h('p', { class: 'petit centre', style: 'margin-bottom:10px' }, 'Touche une carte pour t\'entraîner librement.'), grille),
+    [{ label: 'Fermer', classe: 'btn-clair' }]);
+}
+
+/* ------------------------------ TRÉSORS ------------------------------ */
+function vueTresors(s) {
+  const debloquees = mascottesDebloquees();
+  s.append(
+    h('section', { class: 'panneau' },
+      h('h2', {}, '🐾 Mes mascottes'),
+      h('p', { class: 'petit', style: 'margin-bottom:10px' }, 'Gagne des ⭐ en jouant pour débloquer de nouveaux amis. Touche un ami pour le choisir.'),
+      h('div', { class: 'grille-mascottes' }, MASCOTTES.map((m) => {
+        const ouvert = debloquees.includes(m);
+        return h('button', {
+          class: 'mascotte-case' + (etat.profil.mascotte === m.id ? ' choisie' : '') + (ouvert ? '' : ' verrou'), type: 'button',
+          'aria-label': ouvert ? m.nom : 'Verrouillée, ' + m.xp + ' étoiles',
+          'aria-pressed': etat.profil.mascotte === m.id ? 'true' : 'false',
+          onclick: () => {
+            if (!ouvert) { Son.jouer('doux'); toast('Encore ' + (m.xp - etat.profil.xp) + ' ⭐ pour débloquer ' + m.nom); return; }
+            etat.profil.mascotte = m.id; sauver(); Son.jouer('ok'); Voix.dire(m.nom); aller('tresors');
+          }
+        }, h('span', { 'aria-hidden': 'true' }, ouvert ? m.emoji : '🔒'), h('small', {}, ouvert ? m.nom : m.xp + ' ⭐'));
+      }))),
+    h('section', { class: 'panneau' },
+      h('h2', {}, '🏅 Mes badges'),
+      h('div', { class: 'liste-badges' }, BADGES.map((b) => {
+        const ouvert = etat.badges.includes(b.id);
+        return h('div', { class: 'badge' + (ouvert ? '' : ' verrou') },
+          h('span', { class: 'badge-emoji', 'aria-hidden': 'true' }, ouvert ? b.emoji : '🔒'),
+          h('div', {}, h('strong', {}, b.nom), h('span', { class: 'petit' }, b.desc)));
+      }))));
+}
+
+/* ------------------------------ PARENTS ------------------------------ */
+/** Bouton « maintenir appuyé » (garde parentale légère : évite les appuis accidentels, ce n'est pas une sécurité). */
+function boutonMaintenir(label, duree, action) {
+  let t = null;
+  const b = h('button', { class: 'garde-btn', type: 'button' }, h('span', {}, label));
+  const debut = () => { if (t) return; b.classList.add('maintien'); t = setTimeout(() => { t = null; b.classList.remove('maintien'); action(); }, duree); };
+  const fin = () => { clearTimeout(t); t = null; b.classList.remove('maintien'); };
+  b.addEventListener('pointerdown', debut);
+  ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach((ev) => b.addEventListener(ev, fin));
+  b.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); debut(); } });
+  b.addEventListener('keyup', fin);
+  b.addEventListener('contextmenu', (e) => e.preventDefault());
+  return b;
+}
+
+const LIBELLES_ETAT = { nouvelle: 'nouvelle', apprentissage: 'en apprentissage', revision: 'en révision', reapprentissage: 'à réapprendre' };
+
+function vueParents(s) {
+  if (!parentsOuvert) {
+    s.append(h('section', { class: 'panneau garde' },
+      h('div', { style: 'font-size:3rem' }, '🔒'),
+      h('h2', {}, 'Espace parents'),
+      h('p', {}, 'Réservé aux adultes : réglages, suivi des cartes et sauvegarde.'),
+      boutonMaintenir('Maintenir appuyé 1,5 s', 1500, () => { parentsOuvert = true; Son.jouer('ok'); aller('parents'); }),
+      h('p', { class: 'petit' }, 'Au clavier : maintenir Entrée.')));
+    return;
+  }
+  const r = etat.reglages;
+  const now = maintenant();
+  const compte = (e) => CARTES.filter((c) => c.etat === e).length;
+
+  const champPrenom = h('input', { type: 'text', id: 'p-prenom', maxlength: '20', value: etat.profil.prenom, autocomplete: 'off',
+    oninput: (e) => { etat.profil.prenom = e.target.value; sauver(); } });
+  const selNouvelles = h('select', { id: 'p-nouvelles', onchange: (e) => { r.nouvellesParJour = Number(e.target.value); sauver(); toast('Enregistré'); } },
+    [3, 5, 10].map((n) => h('option', { value: String(n), selected: r.nouvellesParJour === n ? true : null }, n + ' nouvelles cartes par jour')));
+  const caseVoix = h('input', { type: 'checkbox', id: 'p-voix', checked: r.voix ? true : null, onchange: (e) => { r.voix = e.target.checked; sauver(); majEntete(); } });
+  const caseSon = h('input', { type: 'checkbox', id: 'p-son', checked: r.son ? true : null, onchange: (e) => { r.son = e.target.checked; sauver(); majEntete(); } });
+  const caseDelais = h('input', { type: 'checkbox', id: 'p-delais', checked: r.delais ? true : null, onchange: (e) => { r.delais = e.target.checked; sauver(); } });
+  const vitesseVal = h('span', { class: 'petit' }, r.vitesse.toFixed(2));
+  const curseur = h('input', { type: 'range', id: 'p-vitesse', min: '0.6', max: '1.1', step: '0.05', value: String(r.vitesse),
+    oninput: (e) => { r.vitesse = Number(e.target.value); vitesseVal.textContent = r.vitesse.toFixed(2); sauver(); } });
+  const selVoix = Voix.liste.length
+    ? h('select', { id: 'p-voixnom', onchange: (e) => { r.voixNom = e.target.value; Voix.choisir(); sauver(); Voix.dire('Bonjour, je suis la voix choisie.'); } },
+      h('option', { value: '' }, 'Voix automatique'),
+      Voix.liste.map((v) => h('option', { value: v.name, selected: r.voixNom === v.name ? true : null }, v.name + ' (' + v.lang + ')')))
+    : h('p', { class: 'petit' }, Voix.dispo ? 'Aucune voix française détectée sur cet appareil (la liste peut se charger avec un léger retard).' : 'La synthèse vocale n\'est pas disponible sur ce navigateur.');
+
+  s.append(
+    h('section', { class: 'panneau' },
+      h('h2', {}, '⚙️ Réglages'),
+      h('div', { class: 'champ' }, h('label', { for: 'p-prenom' }, 'Prénom de l\'enfant (facultatif, reste sur cet appareil)'), champPrenom),
+      h('div', { class: 'champ' }, h('label', { for: 'p-nouvelles' }, 'Rythme'), selNouvelles),
+      h('div', { class: 'case-a-cocher' }, caseVoix, h('label', { for: 'p-voix' }, 'Voix (synthèse vocale)')),
+      h('div', { class: 'case-a-cocher' }, caseSon, h('label', { for: 'p-son' }, 'Effets sonores')),
+      h('div', { class: 'case-a-cocher' }, caseDelais, h('label', { for: 'p-delais' }, 'Afficher les délais sur les boutons de lecture')),
+      h('div', { class: 'champ' }, h('label', { for: 'p-vitesse' }, 'Vitesse de la voix ', vitesseVal), curseur),
+      h('div', { class: 'champ' }, h('label', { for: 'p-voixnom' }, 'Choix de la voix'), selVoix),
+      h('button', { class: 'btn btn-moyen btn-bleu', type: 'button', onclick: () => Voix.dire('Écris le mot : chat. Le petit animal qui fait miaou.') }, '🔊 Tester la voix')),
+    h('section', { class: 'panneau' },
+      h('h2', {}, '📊 Suivi des cartes'),
+      h('div', { class: 'grille-etats' },
+        [['nouvelle', 'Nouvelles'], ['apprentissage', 'En apprentissage'], ['revision', 'En révision'], ['reapprentissage', 'À réapprendre']]
+          .map(([e, l]) => h('div', { class: 'stat' }, h('strong', {}, String(compte(e))), h('span', {}, l)))),
+      h('div', { class: 'stats-parent' }, CARTES.map((c) => h('div', { class: 'ligne-carte' },
+        h('strong', {}, c.emoji + ' ' + c.mot), ' · ' + c.niveau + ' · ' + (c.type === 'ecriture' ? 'écriture' : 'lecture'),
+        h('br'), LIBELLES_ETAT[c.etat] + ' · intervalle ' + c.intervalle + ' j · facilité ' + c.facilite.toFixed(2) + ' · échecs ' + c.lapses,
+        h('br'), c.etat === 'nouvelle' ? 'pas encore vue' : 'prochaine : ' + formaterDate(c.prochaineRevision) + (c.prochaineRevision <= now ? ' (à faire)' : ''))))),
+    h('section', { class: 'panneau' },
+      h('h2', {}, '🧪 Outils de test'),
+      h('p', { class: 'petit', style: 'margin-bottom:10px' }, 'Simule le passage des jours pour voir revenir les cartes (série et objectifs du jour compris). Jours simulés : ' + etat.decalageJours + '.'),
+      h('div', { style: 'display:flex;flex-direction:column;gap:10px' },
+        h('button', { class: 'btn btn-moyen btn-violet', type: 'button', onclick: () => { etat.decalageJours += 1; sauver(); toast('Un jour de plus (simulé)'); aller('parents'); } }, '⏭️ Simuler le lendemain'),
+        h('button', { class: 'btn btn-moyen btn-clair', type: 'button', onclick: () => { etat.decalageJours = 0; sauver(); toast('Retour à la date réelle'); aller('parents'); } }, '↩️ Revenir à la date réelle'))),
+    h('section', { class: 'panneau' },
+      h('h2', {}, '💾 Données'),
+      h('p', { class: 'petit', style: 'margin-bottom:10px' }, stockageOk ? 'Les progrès sont enregistrés dans ce navigateur (localStorage), sur cet appareil uniquement.' : '⚠️ Le stockage local est indisponible : les progrès seront perdus à la fermeture.'),
+      h('div', { style: 'display:flex;flex-direction:column;gap:10px' },
+        h('button', { class: 'btn btn-moyen btn-bleu', type: 'button', onclick: exporterDonnees }, '⬇️ Exporter la sauvegarde'),
+        h('label', { class: 'btn btn-moyen btn-clair', style: 'cursor:pointer' }, '⬆️ Importer une sauvegarde',
+          h('input', { type: 'file', accept: 'application/json,.json', class: 'visuellement-cache', onchange: importerDonnees })),
+        h('button', { class: 'btn btn-moyen btn-rouge', type: 'button', onclick: () => ouvrirModale('Tout effacer ?', h('p', { class: 'centre' }, 'La progression, les mascottes et les badges seront supprimés sur cet appareil.'),
+          [{ label: 'Oui, tout effacer', classe: 'btn-rouge', action: reinitialiser }, { label: 'Annuler', classe: 'btn-clair' }]) }, '🗑️ Réinitialiser'))),
+    h('section', { class: 'panneau' },
+      h('h2', {}, 'ℹ️ À propos du moteur'),
+      h('p', { class: 'petit' }, 'Répétition espacée inspirée de l\'algorithme par défaut d\'Anki (SM-2 modifié) : pas d\'apprentissage 1 min puis 10 min, facilité de départ 2,5, ajustée de −0,20 (Encore), −0,15 (Presque) ou +0,15 (Facile). Le jour change à 4 h. Non implémenté : jours de retard et variation aléatoire des intervalles. Sources : P. Wozniak, SM-2 (super-memory.com/english/ol/sm2.htm) ; FAQ et manuel Anki (faqs.ankiweb.net, docs.ankiweb.net).')),
+    h('button', { class: 'btn btn-moyen btn-clair', type: 'button', onclick: () => { parentsOuvert = false; aller('accueil'); } }, '🔒 Verrouiller et quitter'));
+}
+
+function exporterDonnees() {
+  sauver();
+  const blob = new Blob([JSON.stringify(etat, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = h('a', { href: url, download: 'iles-des-mots-sauvegarde.json' });
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  toast('Sauvegarde exportée');
+}
+function importerDonnees(e) {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  const lecteur = new FileReader();
+  lecteur.onload = () => {
+    try {
+      const obj = JSON.parse(String(lecteur.result));
+      if (!obj || obj.version !== 1 || typeof obj.cartes !== 'object') throw new Error('format');
+      etat = fusionner(etatParDefaut(), obj);
+      appliquerSauvegarde(); Voix.choisir(); sauver();
+      toast('Sauvegarde importée'); aller('parents');
+    } catch (err) { toast('Fichier non reconnu'); }
+  };
+  lecteur.readAsText(f);
+}
+function reinitialiser() {
+  etat = etatParDefaut();
+  for (const c of CARTES) Object.assign(c, SRS.etatInitial(Date.now()));
+  majJour(); sauver(); Voix.choisir();
+  toast('Tout est remis à zéro');
+  aller('accueil');
+}
+
+/* =====================================================================
+   K. SÉANCE DE JEU
+   ===================================================================== */
+function demarrerSeance(opts) {
+  Son.debloquer();
+  majJour();
+  S = {
+    libre: !!opts.libre, liste: opts.liste ? opts.liste.slice() : null, index: 0,
+    passages: {}, reponses: 0, reussies: 0, xp: 0, dernierId: null,
+    carte: null, verrou: false, phase: 'recto', aide: false,
+    mascottes: [], badges: [], journeeTerminee: false
+  };
+  suivante();
+}
+
+function suivante() {
+  const now = maintenant();
+  let c;
+  if (S.libre) c = S.liste[S.index++] || null;
+  else c = prochaineCarte(now, S.dernierId, S.passages);
+  if (!c) { terminerSeance(); return; }
+  S.carte = c; S.dernierId = c.id; S.verrou = false; S.phase = 'recto'; S.aide = false;
+  S.passages[c.id] = (S.passages[c.id] || 0) + 1;
+  afficherCarte();
+}
+
+function terminerSeance() {
+  S.fini = true;
+  aller('bilan');
+}
+
+function demanderQuitter() {
+  Son.jouer('clic');
+  ouvrirModale('On arrête ?', h('p', { class: 'centre' }, 'Tes progrès sont gardés. Tu pourras continuer plus tard.'),
+    [{ label: '▶ Continuer à jouer', classe: 'btn-vert' }, { label: 'Quitter', classe: 'btn-clair', action: () => aller('accueil') }]);
+}
+
+function majBarreJeu() {
+  const el = $('#barre-jeu');
+  if (!el) return;
+  let fait, total;
+  if (S.libre) { fait = Math.max(0, S.index - 1); total = S.liste.length; }
+  else ({ fait, total } = progressionJour(maintenant()));
+  const pct = total > 0 ? Math.round((fait / total) * 100) : 0;
+  el.firstElementChild.style.width = pct + '%';
+  el.setAttribute('aria-valuenow', String(fait));
+  el.setAttribute('aria-valuemax', String(total));
+}
+
+function afficherCarte() {
+  vue = 'jeu';
+  document.body.dataset.vue = 'jeu';
+  const c = S.carte;
+  const s = scene();
+  s.replaceChildren();
+  const consigneTexte = c.indiceAudio;
+  s.append(
+    h('div', { class: 'jeu-haut' },
+      h('button', { class: 'btn btn-rond btn-clair', type: 'button', 'aria-label': 'Quitter le jeu', onclick: demanderQuitter }, '✖'),
+      h('div', { class: 'barre', id: 'barre-jeu', role: 'progressbar', 'aria-label': S.libre ? 'Progression du jeu libre' : 'Progression du jour', 'aria-valuemin': '0', 'aria-valuenow': '0', 'aria-valuemax': '1' },
+        h('div', { class: 'barre-remplie' })),
+      h('div', { class: 'mascotte-mini', id: 'mascotte-jeu', 'aria-hidden': 'true' }, mascotteCourante().emoji)),
+    h('div', { class: 'consigne' },
+      h('button', { class: 'btn btn-rond btn-bleu', type: 'button', 'aria-label': 'Écouter la consigne', onclick: () => { Son.jouer('clic'); Voix.dire(consigneTexte); } }, '🔊'),
+      h('p', {}, consigneTexte + (Voix.dispo ? '' : ' (voix indisponible sur cet appareil)'))),
+    c.type === 'lecture' ? zoneLecture(c) : zoneEcriture(c));
+  if (c.type === 'ecriture') dessinerEcriture();
+  majBarreJeu();
+  annoncer('Nouvelle carte : ' + (c.type === 'lecture' ? 'lecture' : 'écriture'));
+  Voix.dire(consigneTexte);
+  window.scrollTo(0, 0);
+}
+
+/** Applique la réponse : planification SRS, XP, série, badges. Retourne { xpGagne }. */
+function repondre(note, meta) {
+  const c = S.carte;
+  majJour();
+  const now = maintenant();
+  const n = NOTES[note - 1];
+  S.reponses++;
+  if (note >= 2) S.reussies++;
+  if (S.libre) return { xpGagne: 0 };
+
+  const avant = c.etat;
+  Object.assign(c, SRS.planifier(c, note, now));
+  if (avant === 'nouvelle' && !etat.jour.nouvelles.includes(c.id)) etat.jour.nouvelles.push(c.id);
+  if (c.etat === 'revision' && !etat.jour.validees.includes(c.id)) etat.jour.validees.push(c.id);
+
+  const xpAvant = etat.profil.xp;
+  etat.profil.xp += n.xp;
+  S.xp += n.xp;
+  etat.compteurs.reponses++;
+  if (c.type === 'lecture' && note >= 3) etat.compteurs.lecture++;
+  if (c.type === 'ecriture') {
+    if (note >= 3) { etat.compteurs.ecriture++; etat.compteurs.parfaitsDAffilee++; } else etat.compteurs.parfaitsDAffilee = 0;
+  }
+  majSerie(now);
+
+  if (!etat.jour.termine && restantAujourdhui(now) === 0) {
+    etat.jour.termine = true;
+    etat.compteurs.journees++;
+    etat.profil.xp += 20; S.xp += 20;
+    S.journeeTerminee = true;
+  }
+  for (const m of MASCOTTES) if (m.xp > xpAvant && m.xp <= etat.profil.xp) S.mascottes.push(m);
+  for (const b of BADGES) {
+    if (!etat.badges.includes(b.id) && b.ok()) { etat.badges.push(b.id); S.badges.push(b); }
+  }
+  sauver();
+  return { xpGagne: n.xp };
+}
+
+function majSerie(now) {
+  const aujourdhui = cleJour(now);
+  if (etat.serie.derniere === aujourdhui) return;
+  etat.serie.n = (etat.serie.derniere && ecartJours(etat.serie.derniere, aujourdhui) === 1) ? etat.serie.n + 1 : 1;
+  etat.serie.derniere = aujourdhui;
+}
+
+function reactionMascotte() {
+  const m = $('#mascotte-jeu');
+  if (!m) return;
+  m.classList.remove('saute'); void m.offsetWidth; m.classList.add('saute');
+}
+
+/* ------------------------------ MODE LECTURE ------------------------------ */
+function zoneLecture(c) {
+  const mot = h('div', { class: 'mot-lecture ' + classeTaille(c.mot), id: 'mot-recto' }, c.mot);
+  const boutonAide = h('button', { class: 'btn btn-clair', type: 'button', id: 'btn-aide-lecture',
+    onclick: () => {
+      if (S.aide || S.verrou) return;
+      S.aide = true; Son.jouer('clic');
+      const colore = motColore(c, false); colore.id = 'mot-recto';
+      $('#mot-recto').replaceWith(colore);
+      $('#btn-aide-lecture').disabled = true;
+      Voix.dire(c.syllabes[0].toLowerCase());
+    } }, '💡 Aide : les syllabes');
+  const recto = h('div', { class: 'face recto' }, mot, boutonAide);
+  const verso = h('div', { class: 'face verso', 'aria-hidden': 'true' },
+    h('div', { class: 'emoji-grand' }, c.emoji),
+    motColore(c, true),
+    h('button', { class: 'btn btn-bleu', type: 'button', onclick: () => { Son.jouer('clic'); Voix.dire(motParle(c)); } }, '🔊 Écouter le mot'),
+    h('p', { class: 'petit' }, 'Touche une syllabe pour l\'entendre.'));
+  return h('div', { class: 'zone zone-lecture' },
+    h('div', { class: 'carte3d', id: 'carte3d' }, h('div', { class: 'carte3d-int' }, recto, verso)),
+    h('div', { class: 'jeu-bas', id: 'jeu-bas' },
+      h('button', { class: 'btn btn-gros btn-vert', type: 'button', id: 'btn-retourner', onclick: retournerCarte }, '🔄 Retourner la carte')));
+}
+
+function retournerCarte() {
+  if (S.phase !== 'recto') return;
+  S.phase = 'verso';
+  const c = S.carte;
+  $('#carte3d').classList.add('retournee');
+  $('.verso').removeAttribute('aria-hidden');
+  $('.recto').setAttribute('aria-hidden', 'true');
+  Son.jouer('retourne');
+  Voix.dire(motParle(c));
+  annoncer('Mot : ' + c.mot.toLowerCase());
+  const bas = $('#jeu-bas');
+  if (S.libre) {
+    bas.replaceChildren(h('button', { class: 'btn btn-gros btn-vert', type: 'button', onclick: () => { Son.jouer('ok'); S.reponses++; S.reussies++; suivante(); } }, 'Suivant ▶'));
+    return;
+  }
+  const now = maintenant();
+  const delais = etat.reglages.delais ? SRS.apercu(c, now) : null;
+  bas.replaceChildren(
+    h('p', { class: 'question' }, 'Comment as-tu lu ce mot ?'),
+    h('div', { class: 'notes' }, NOTES.map((n, i) =>
+      h('button', {
+        class: 'note-btn ' + n.classe, type: 'button', 'aria-label': n.label,
+        disabled: (n.note === 4 && S.aide) ? true : null, // pas de « Facile » si l'aide a été utilisée
+        onclick: () => noterLecture(n.note)
+      }, h('span', { class: 'note-emoji', 'aria-hidden': 'true' }, n.emoji), n.label,
+        delais ? h('span', { class: 'note-delai' }, delais[i]) : null))));
+}
+
+function noterLecture(note) {
+  if (S.verrou) return;
+  S.verrou = true;
+  const { xpGagne } = repondre(note);
+  const n = NOTES[note - 1];
+  reactionMascotte();
+  const parole = note >= 3 ? choisir(PHRASES_BRAVO) : note === 2 ? choisir(PHRASES_COURAGE) : choisir(PHRASES_REVOIR);
+  Son.jouer(note === 4 ? 'super' : note === 3 ? 'bravo' : note === 2 ? 'ok' : 'doux');
+  Voix.dire(parole);
+  if (note === 4) Confettis.lancer(50);
+  majBarreJeu();
+  $('#jeu-bas').replaceChildren(h('div', { class: 'retour' },
+    h('span', { class: 'retour-emoji', 'aria-hidden': 'true' }, n.emoji), parole,
+    xpGagne ? h('span', { class: 'retour-xp' }, '+' + xpGagne + ' ⭐') : null));
+  const idCarte = c => c.id; // la temporisation ne doit rien faire si l'enfant a quitté la séance entre-temps
+  const jeton = idCarte(S.carte);
+  setTimeout(() => { if (vue === 'jeu' && S && S.verrou && S.carte && idCarte(S.carte) === jeton) suivante(); }, 1500);
+}
+
+/* ------------------------------ MODE ÉCRITURE ------------------------------ */
+let E = null; // état de l'exercice d'écriture en cours
+
+/** Note SRS déduite des erreurs et des aides (pas de bouton à choisir pour l'enfant). */
+function noteEcriture(erreurs, aides) {
+  const total = erreurs + aides;
+  if (total === 0) return SRS.GOOD;
+  if (total === 1) return SRS.HARD;
+  return SRS.AGAIN;
+}
+const etoilesEcriture = (note) => (note === SRS.GOOD ? 3 : note === SRS.HARD ? 2 : 1);
+
+function zoneEcriture(c) {
+  const toutes = [...c.unites, ...c.leurres].map((texte, id) => ({ id, texte, place: false }));
+  // On évite que les briques apparaissent déjà dans le bon ordre.
+  let banque = melanger(toutes);
+  for (let essai = 0; essai < 6 && banque.slice(0, c.unites.length).every((t, i) => t.id === i); essai++) banque = melanger(toutes);
+  const lmax = Math.max(...c.unites.map((u) => u.length));
+  E = {
+    carte: c, attendu: c.unites.slice(), banque,
+    cases: c.unites.map(() => ({ tuile: null, verrou: false, etat: '' })),
+    erreurs: 0, aides: 0, termine: false, occupe: false,
+    syllabes: lmax >= 3, fs: lmax >= 3 ? '1.45rem' : '1.9rem'
+  };
+  return h('div', { class: 'zone zone-ecriture' },
+    h('div', { class: 'carte-ecriture' },
+      h('div', { class: 'emoji-grand', 'aria-hidden': 'true' }, c.emoji),
+      h('div', { class: 'cases' + (E.syllabes ? ' syl' : ''), id: 'cases', style: '--n:' + c.unites.length + ';--fs:' + E.fs, 'aria-label': 'Cases du mot à écrire' })),
+    h('div', { class: 'jeu-bas', id: 'jeu-bas' },
+      h('div', { class: 'banque', id: 'banque', style: '--fs:' + E.fs, 'aria-label': 'Lettres et syllabes disponibles' }),
+      h('div', { class: 'outils', id: 'outils' },
+        h('button', { class: 'btn btn-bleu', type: 'button', onclick: () => { Son.jouer('clic'); Voix.dire(S.carte.indiceAudio); } }, h('span', { class: 'outil-emoji' }, '🔊'), 'Écouter'),
+        h('button', { class: 'btn btn-orange', style: '--c:var(--orange);--cf:var(--orange-fonce)', type: 'button', onclick: aideEcriture }, h('span', { class: 'outil-emoji' }, '💡'), 'Aide'),
+        h('button', { class: 'btn btn-clair', type: 'button', onclick: effacerEcriture }, h('span', { class: 'outil-emoji' }, '🧹'), 'Effacer'))));
+}
+
+/** Redessine les cases et la banque à partir de l'état E (appelé après chaque action). */
+function dessinerEcriture() {
+  const zc = $('#cases'), zb = $('#banque');
+  if (!zc || !zb) return;
+  zc.replaceChildren(...E.cases.map((cs, i) => {
+    const t = cs.tuile === null ? null : E.banque.find((b) => b.id === cs.tuile);
+    const classe = 'case' + (t ? ' pleine' : '') + (cs.etat ? ' ' + cs.etat : '');
+    return h('button', {
+      class: classe, type: 'button',
+      'aria-label': t ? 'Case ' + (i + 1) + ' : ' + t.texte.toLowerCase() + (cs.verrou ? ' (verrouillée)' : ', toucher pour retirer') : 'Case ' + (i + 1) + ' vide',
+      onclick: () => retirerCase(i)
+    }, t ? t.texte : '');
+  }));
+  zb.replaceChildren(...E.banque.map((t) => h('button', {
+    class: 'tuile' + (t.place ? ' utilisee' : ''), type: 'button', disabled: t.place ? true : null,
+    'aria-label': t.texte.toLowerCase(), onclick: () => poserTuile(t.id)
+  }, t.texte)));
+}
+
+function poserTuile(id) {
+  if (E.termine || E.occupe) return;
+  const i = E.cases.findIndex((cs) => cs.tuile === null);
+  if (i === -1) return;
+  const t = E.banque.find((b) => b.id === id);
+  if (!t || t.place) return;
+  t.place = true; E.cases[i].tuile = id; E.cases[i].etat = '';
+  Son.jouer('pose');
+  dessinerEcriture();
+  if (E.cases.every((cs) => cs.tuile !== null)) verifierEcriture();
+}
+
+function retirerCase(i) {
+  if (E.termine || E.occupe) return;
+  const cs = E.cases[i];
+  if (cs.tuile === null || cs.verrou) return;
+  E.banque.find((b) => b.id === cs.tuile).place = false;
+  cs.tuile = null; cs.etat = '';
+  Son.jouer('clic');
+  dessinerEcriture();
+}
+
+function effacerEcriture() {
+  if (E.termine || E.occupe) return;
+  Son.jouer('clic');
+  E.cases.forEach((cs) => {
+    if (cs.tuile !== null && !cs.verrou) { E.banque.find((b) => b.id === cs.tuile).place = false; cs.tuile = null; cs.etat = ''; }
+  });
+  dessinerEcriture();
+}
+
+function texteCase(i) {
+  const cs = E.cases[i];
+  if (cs.tuile === null) return null;
+  return E.banque.find((b) => b.id === cs.tuile).texte;
+}
+
+function verifierEcriture() {
+  const justes = E.cases.map((cs, i) => texteCase(i) === E.attendu[i]);
+  if (justes.every(Boolean)) { finEcriture(); return; }
+  E.erreurs++;
+  E.occupe = true;
+  E.cases.forEach((cs, i) => { cs.etat = justes[i] ? 'juste' : 'faux'; });
+  dessinerEcriture();
+  Son.jouer('erreur');
+  Voix.dire('Oups ! Essaie encore.');
+  setTimeout(() => {
+    E.cases.forEach((cs, i) => {
+      if (justes[i]) { cs.verrou = true; cs.etat = 'juste'; }
+      else { E.banque.find((b) => b.id === cs.tuile).place = false; cs.tuile = null; cs.etat = ''; }
+    });
+    E.occupe = false;
+    dessinerEcriture();
+  }, 1100);
+}
+
+function aideEcriture() {
+  if (E.termine || E.occupe) return;
+  const i = E.cases.findIndex((cs, k) => !cs.verrou && texteCase(k) !== E.attendu[k]);
+  if (i === -1) return;
+  const cs = E.cases[i];
+  if (cs.tuile !== null) { E.banque.find((b) => b.id === cs.tuile).place = false; cs.tuile = null; }
+  const t = E.banque.find((b) => !b.place && b.texte === E.attendu[i]);
+  if (!t) return;
+  E.aides++;
+  t.place = true; cs.tuile = t.id; cs.verrou = true; cs.etat = 'indice';
+  Son.jouer('pose');
+  Voix.dire(motParle(S.carte));
+  dessinerEcriture();
+  if (E.cases.every((x, k) => texteCase(k) === E.attendu[k])) finEcriture();
+}
+
+function finEcriture() {
+  E.termine = true;
+  const c = S.carte;
+  const note = noteEcriture(E.erreurs, E.aides);
+  const etoiles = etoilesEcriture(note);
+  const { xpGagne } = repondre(note);
+  E.cases.forEach((cs) => { cs.etat = 'juste'; });
+  dessinerEcriture();
+  reactionMascotte();
+  Son.jouer(etoiles === 3 ? 'super' : etoiles === 2 ? 'bravo' : 'ok');
+  if (etoiles === 3) Confettis.lancer(90);
+  Voix.dire([etoiles >= 2 ? choisir(PHRASES_BRAVO) : 'Tu as réussi !', motParle(c)]);
+  annoncer('Bravo ! ' + etoiles + ' étoile' + (etoiles > 1 ? 's' : ''));
+  majBarreJeu();
+  $('#jeu-bas').replaceChildren(h('div', { class: 'resultat' },
+    motColore(c, true),
+    h('div', { class: 'etoiles', 'aria-label': etoiles + ' étoile' + (etoiles > 1 ? 's' : '') + ' sur 3' },
+      [1, 2, 3].map((k) => h('span', { class: 'etoile-pop' + (k <= etoiles ? '' : ' vide'), 'aria-hidden': 'true' }, '⭐'))),
+    xpGagne ? h('p', { class: 'retour-xp', style: 'font-weight:800' }, '+' + xpGagne + ' ⭐') : null,
+    h('button', { class: 'btn btn-gros btn-vert', type: 'button', onclick: () => { Son.jouer('ok'); suivante(); } }, 'Suivant ▶')));
+}
+
+/* ------------------------------ BILAN ------------------------------ */
+function vueBilan(s) {
+  const r = S;
+  const now = maintenant();
+  const { fait, total } = progressionJour(now);
+  const titre = r.reponses === 0 ? 'Rien à faire pour l\'instant' : r.journeeTerminee ? '🎉 Journée terminée !' : '🌟 Belle aventure !';
+  const restant = restantAujourdhui(now);
+  const blocs = [h('h1', {}, titre)];
+  if (r.reponses > 0) {
+    blocs.push(h('div', { class: 'stats-bilan' },
+      h('div', { class: 'stat' }, h('strong', {}, String(r.reponses)), h('span', {}, 'cartes jouées')),
+      h('div', { class: 'stat' }, h('strong', {}, String(r.reussies)), h('span', {}, 'réussies')),
+      h('div', { class: 'stat' }, h('strong', {}, r.libre ? '—' : '+' + r.xp), h('span', {}, r.libre ? 'jeu libre' : '⭐ gagnées'))));
+  }
+  if (!r.libre) {
+    blocs.push(h('div', {}, h('div', { class: 'ligne', style: 'margin-bottom:6px' }, h('strong', {}, 'Aujourd\'hui'), h('span', {}, fait + ' / ' + total)), barre(fait, total)));
+    if (restant > 0 && r.reponses > 0) blocs.push(h('p', { class: 'petit' }, 'Il reste des mots à revoir plus tard : reviens un peu plus tard pour les finir.'));
+  }
+  if (r.mascottes.length) {
+    blocs.push(h('div', { class: 'gain' },
+      h('strong', {}, r.mascottes.length > 1 ? 'Nouveaux amis débloqués !' : 'Nouvel ami débloqué !'),
+      h('div', { class: 'gain-ligne' }, r.mascottes.map((m) => h('div', { class: 'gain-puce' }, h('span', { class: 'gain-emoji', 'aria-hidden': 'true' }, m.emoji), m.nom)))));
+  }
+  if (r.badges.length) {
+    blocs.push(h('div', { class: 'gain' },
+      h('strong', {}, r.badges.length > 1 ? 'Nouveaux badges !' : 'Nouveau badge !'),
+      h('div', { class: 'gain-ligne' }, r.badges.map((b) => h('div', { class: 'gain-puce' }, h('span', { class: 'gain-emoji', 'aria-hidden': 'true' }, b.emoji), b.nom)))));
+  }
+  blocs.push(h('div', { style: 'display:flex;flex-direction:column;gap:10px' },
+    h('button', { class: 'btn btn-gros btn-vert', type: 'button', onclick: () => { Son.jouer('ok'); aller('accueil'); } }, '🏠 Retour à la carte'),
+    r.reponses > 0 ? h('button', { class: 'btn btn-moyen btn-bleu', type: 'button', onclick: () => demarrerSeance({ libre: true, liste: melanger(CARTES).slice(0, 5) }) }, '🎲 Jeu libre') : null));
+  s.append(h('section', { class: 'panneau bilan' }, blocs));
+
+  if (r.reussies > 0) {
+    const grand = r.journeeTerminee || r.mascottes.length > 0;
+    Son.jouer(grand ? 'fanfare' : 'bravo');
+    setTimeout(() => Confettis.lancer(grand ? 200 : 90), 150);
+    Voix.dire(r.journeeTerminee ? 'Bravo ! Tu as terminé ta journée !' : 'Bravo ! Belle aventure !');
+  }
+}
+
+/* =====================================================================
+   L. DÉMARRAGE
+   ===================================================================== */
+function init() {
+  etat = chargerEtat();
+  appliquerSauvegarde();
+  majJour();
+  verifierDonnees();
+  Voix.init();
+  Voix.choisir();
+  // Débloque le son au premier geste de l'utilisateur (politique d'autoplay des navigateurs).
+  const debloquer = () => { Son.debloquer(); };
+  window.addEventListener('pointerdown', debloquer, { once: true, passive: true });
+  window.addEventListener('keydown', debloquer, { once: true });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) Voix.stop(); });
+  window.addEventListener('pagehide', () => Voix.stop());
+  sauver();
+  aller('accueil');
+}
+init();
+</script>
+</body>
+</html>
